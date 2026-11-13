@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Keychain</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Keychain">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#e4e7e2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121617" media="(prefers-color-scheme: dark)">
+<style>
+:root{--bg:#e4e7e2;--ink:#161a1b;--mute:#667068;--card:#f3f5f1;--line:#c8cec8;--acc:#2157ba;--on:#f3f5f1;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#121617;--ink:#e9ece8;--mute:#8e9993;--card:#1c2224;--line:#2f383a;--acc:#7aa2f0;--on:#121617;color-scheme:dark}}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,sans-serif;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding-top:env(safe-area-inset-top)}
+#app{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px}
+.brand{display:flex;align-items:center;gap:10px;font:600 24px ui-serif,Georgia,serif;letter-spacing:-.01em}
+.dots{display:flex;gap:4px}.dots i{width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(128,128,128,.35)}
+.pill{font:500 12px ui-monospace,Menlo,monospace;letter-spacing:.04em;text-transform:uppercase;padding:9px 14px;border:1px solid var(--line);border-radius:99px;background:var(--card);color:var(--ink)}
+#stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.frame{position:relative;width:min(92vw,calc(100dvh - 370px),360px);min-width:230px;padding:40px 14px 14px;background:var(--card);border:1px solid var(--line);border-radius:28px;box-shadow:0 18px 40px -22px rgba(0,0,0,.4)}
+.frame::before{content:"";position:absolute;top:14px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--bg);box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
+#cv{display:block;margin:0 auto;width:100%;aspect-ratio:1;image-rendering:pixelated;touch-action:none;border-radius:6px;background:#fff;cursor:grab}
+#empty{position:absolute;inset:40px 14px 14px;display:grid;place-content:center;gap:6px;text-align:center;border:1.5px dashed var(--line);border-radius:6px;background:var(--card);cursor:pointer}
+#empty b{font:600 20px ui-serif,Georgia,serif}#empty span{font-size:13px;color:var(--mute)}
+.has #empty{display:none}
+#hint{height:16px;font:12px ui-monospace,Menlo,monospace;letter-spacing:.02em;color:var(--mute)}
+#dock{padding:8px 20px calc(14px + env(safe-area-inset-bottom));display:grid;gap:12px}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:0 20px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:10px 15px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--mute);font:500 14px system-ui,sans-serif}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--on);border-color:var(--ink)}
+.slide{display:flex;align-items:center;gap:12px}
+.val{min-width:54px;padding:6px 0;border:0;background:none;color:var(--mute);font:500 13px ui-monospace,Menlo,monospace;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:32px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-12px;border-radius:50%;background:var(--ink);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
+.row{display:flex;gap:8px}
+.btn{height:50px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 15px system-ui,sans-serif;display:grid;place-items:center;cursor:pointer}
+#send,#save{background:var(--ink);color:var(--on);border-color:var(--ink)}
+#send{flex:1;min-width:0;padding:0 16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:48px;text-align:center}
+#send:disabled{opacity:.4}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+#toast{position:fixed;left:50%;bottom:calc(178px + env(safe-area-inset-bottom));transform:translate(-50%,8px);max-width:min(90vw,420px);padding:11px 16px;border-radius:14px;background:var(--ink);color:var(--on);font-size:14px;text-align:center;opacity:0;pointer-events:none;transition:.25s;z-index:9}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#sheet{position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.45);z-index:5}
+#sheet[hidden]{display:none}
+.panel{width:100%;max-width:480px;background:var(--bg);border-radius:24px 24px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));display:grid;gap:10px}
+.panel h2{font:600 22px ui-serif,Georgia,serif}
+.panel p{font-size:14px;color:var(--mute)}
+.panel label{font:500 12px ui-monospace,Menlo,monospace;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.panel input{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:16px system-ui,sans-serif;-webkit-user-select:text;user-select:text}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">Keychain<span class="dots" id="dots" aria-hidden="true"></span></div>
+    <button class="pill" id="setup">Setup</button>
+  </header>
+  <main id="stage">
+    <div class="frame">
+      <canvas id="cv" width="240" height="240" aria-label="Preview of the photo on the e-ink screen. Drag to move, pinch to zoom."></canvas>
+      <label id="empty" for="file"><b>Choose a photo</b><span>then drag and pinch to frame it</span></label>
+    </div>
+    <div id="hint"></div>
+  </main>
+  <section id="dock">
+    <div class="chips" id="chips" role="group" aria-label="Adjustments"></div>
+    <div class="slide"><input id="sl" type="range" aria-label="Adjustment amount"><button class="val" id="val" aria-label="Reset this adjustment"></button></div>
+    <div class="row">
+      <label class="btn" for="file">Photo</label>
+      <button class="btn" id="fit">Fit</button>
+      <button class="btn" id="reset">Reset</button>
+      <button class="btn" id="send" disabled>Send</button>
+    </div>
+  </section>
+</div>
+<input id="file" class="vh" type="file" accept="image/*">
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="sheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="st">
+    <h2 id="st">Setup</h2>
+    <p id="ios" hidden>Tip: tap Share, then Add to Home Screen, to open this like an app. The home-screen app keeps its own settings, so you will enter the slot name again there.</p>
+    <label for="nm">Their name (optional)</label>
+    <input id="nm" type="text" maxlength="20" autocomplete="off">
+    <label for="slot">Their slot name</label>
+    <input id="slot" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <p>This is the private mailbox for their keychain. Letters and digits only.</p>
+    <button class="btn" id="save">Save</button>
+  </div>
+</div>
+<script>
+const DB="https://keychain-b8a5e-default-rtdb.firebaseio.com",N=240;
+// 0 black, 1 white, 2 red, 3 yellow, 4 blue, 5 green (colors from the Python preview tool)
+const PAL=[[0,0,0],[255,255,255],[160,32,32],[240,224,80],[80,128,184],[96,128,80]];
+const TOOLS=[["bright","Brightness",0,3],["contrast","Contrast",0,3],["sat","Color",0,3],["dither","Dither",0,1]];
+const $=s=>document.querySelector(s);
+const ls={get:k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const okSlot=v=>/^[A-Za-z0-9]{10,}$/.test(v);
+const P={bright:1,contrast:1,sat:1,dither:1};
+let src,mips=[],w,h,s,sx,sy,fill="#fff",idx=null,tool="bright",busy=false,raf=0,tt;
+const cv=$("#cv"),cx=cv.getContext("2d");
+const work=document.createElement("canvas");work.width=work.height=N;
+const wc=work.getContext("2d",{willReadFrequently:true});
+
+PAL.forEach(c=>{const i=document.createElement("i");i.style.background="rgb("+c+")";$("#dots").append(i)});
+TOOLS.forEach(([k,l])=>{const b=document.createElement("button");b.className="chip";b.textContent=l;b.dataset.k=k;b.onclick=()=>pick(k);$("#chips").append(b)});
+const bdr=document.createElement("button");bdr.className="chip";$("#chips").append(bdr);
+const bdl=()=>{bdr.textContent="Border: "+(fill==="#fff"?"White":"Black")};
+bdr.onclick=()=>{fill=fill==="#fff"?"#000":"#fff";bdl();sched()};bdl();
+
+function pick(k){
+  tool=k;const t=TOOLS.find(t=>t[0]===k),sl=$("#sl");
+  document.querySelectorAll(".chip[data-k]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.k===k));
+  sl.min=t[2];sl.max=t[3];sl.step=.05;sl.value=P[k];$("#val").textContent=P[k].toFixed(2);
+}
+$("#sl").oninput=e=>{P[tool]=+e.target.value;$("#val").textContent=P[tool].toFixed(2);sched()};
+$("#val").onclick=()=>{P[tool]=1;pick(tool);sched()};
+pick("bright");
+
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),3400)}
+const ctr=()=>{sx=(w-s)/2;sy=(h-s)/2};
+const pan=()=>{sx=w>=s?clamp(sx,0,w-s):(w-s)/2;sy=h>=s?clamp(sy,0,h-s):(h-s)/2};
+const zlim=v=>clamp(v,Math.min(w,h)/8,Math.max(w,h));
+
+$("#file").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const im=new Image();
+  im.onload=()=>{
+    const k=Math.min(1,2000/Math.max(im.width,im.height));
+    w=Math.round(im.width*k);h=Math.round(im.height*k);
+    src=document.createElement("canvas");src.width=w;src.height=h;
+    src.getContext("2d").drawImage(im,0,0,w,h);URL.revokeObjectURL(im.src);
+    mips=[src];
+    while(Math.min(mips[mips.length-1].width,mips[mips.length-1].height)>=N*2){const p=mips[mips.length-1],c=document.createElement("canvas");c.width=Math.max(1,p.width>>1);c.height=Math.max(1,p.height>>1);const q=c.getContext("2d");q.imageSmoothingQuality="high";q.drawImage(p,0,0,c.width,c.height);mips.push(c)}
+    s=Math.min(w,h);ctr();$("#stage").classList.add("has");$("#hint").textContent="Drag to move · pinch to zoom";sched();
+  };
+  im.onerror=()=>toast("Couldn’t open that photo. Try another one.");
+  im.src=URL.createObjectURL(f);e.target.value="";
+};
+$("#fit").onclick=()=>{if(!src)return;s=s<Math.max(w,h)-1?Math.max(w,h):Math.min(w,h);ctr();sched()};
+$("#reset").onclick=()=>{Object.keys(P).forEach(k=>P[k]=1);fill="#fff";bdl();pick(tool);if(src){s=Math.min(w,h);ctr()}sched()};
+
+// Gestures: one finger pans, two fingers pinch-zoom around the midpoint, wheel zooms on desktop
+const pts=new Map();let g0=null;
+const pa=()=>[...pts.values()];
+const cen=(a,r)=>({x:a.reduce((t,p)=>t+p.x,0)/a.length-r.left,y:a.reduce((t,p)=>t+p.y,0)/a.length-r.top});
+const dst=a=>Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+function begin(){const a=pa(),r=cv.getBoundingClientRect(),c=cen(a,r);g0={s,d:a.length>1?dst(a):0,ax:sx+c.x/r.width*s,ay:sy+c.y/r.height*s}}
+cv.onpointerdown=e=>{if(!src)return;cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});begin()};
+cv.onpointermove=e=>{
+  if(!pts.has(e.pointerId))return;
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const a=pa(),r=cv.getBoundingClientRect(),c=cen(a,r);
+  s=a.length>1&&g0.d?zlim(g0.s*g0.d/dst(a)):g0.s;
+  sx=g0.ax-c.x/r.width*s;sy=g0.ay-c.y/r.height*s;pan();sched();
+};
+cv.onpointerup=cv.onpointercancel=e=>{pts.delete(e.pointerId);if(pts.size)begin()};
+cv.addEventListener("wheel",e=>{
+  if(!src)return;e.preventDefault();
+  const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height,ax=sx+x*s,ay=sy+y*s;
+  s=zlim(s*Math.exp(e.deltaY*.002));sx=ax-x*s;sy=ay-y*s;pan();sched();
+},{passive:false});
+
+function fitCv(){const fr=cv.parentElement;fr.style.width="";const d=window.devicePixelRatio||1,av=fr.clientWidth-28,k=Math.max(1,Math.floor(av*d/N)),z=N*k/d;cv.style.width=z+"px";fr.style.width=(z+30)+"px"}
+addEventListener("resize",fitCv);fitCv();
+const sched=()=>{if(!raf)raf=requestAnimationFrame(render)};
+function render(){
+  raf=0;
+  if(!src){cx.fillStyle="#fff";cx.fillRect(0,0,N,N);return}
+  wc.fillStyle=fill;wc.fillRect(0,0,N,N);wc.imageSmoothingQuality="high";
+  const x0=Math.max(sx,0),y0=Math.max(sy,0),x1=Math.min(sx+s,w),y1=Math.min(sy+s,h);
+  let l=0;while(l+1<mips.length&&s/Math.pow(2,l+1)>=N)l++;
+  const ms=mips[l],fx=ms.width/w,fy=ms.height/h;
+  if(x1>x0&&y1>y0)wc.drawImage(ms,x0*fx,y0*fy,(x1-x0)*fx,(y1-y0)*fy,(x0-sx)/s*N,(y0-sy)/s*N,(x1-x0)/s*N,(y1-y0)/s*N);
+  // Same order as the Python tool: brightness, contrast, color, then dither
+  const a=new Uint8ClampedArray(wc.getImageData(0,0,N,N).data),L=N*N,n=L*4;
+  for(let i=0;i<n;i+=4){a[i]*=P.bright;a[i+1]*=P.bright;a[i+2]*=P.bright}
+  let m=0;for(let i=0;i<n;i+=4)m+=(299*a[i]+587*a[i+1]+114*a[i+2])/1000;
+  m=Math.floor(m/L+.5);
+  for(let i=0;i<n;i+=4){a[i]=m+(a[i]-m)*P.contrast;a[i+1]=m+(a[i+1]-m)*P.contrast;a[i+2]=m+(a[i+2]-m)*P.contrast}
+  for(let i=0;i<n;i+=4){const y=(299*a[i]+587*a[i+1]+114*a[i+2])/1000;a[i]=y+(a[i]-y)*P.sat;a[i+1]=y+(a[i+1]-y)*P.sat;a[i+2]=y+(a[i+2]-y)*P.sat}
+  const f=new Float32Array(L*3);
+  for(let i=0,j=0;i<n;i+=4){f[j++]=a[i];f[j++]=a[i+1];f[j++]=a[i+2]}
+  const o=cx.createImageData(N,N),od=o.data,wt=P.dither;idx=new Uint8Array(L);
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const i=y*N+x,q=i*3,r=f[q],g=f[q+1],b=f[q+2];let k=0,best=1e18;
+    for(let c=0;c<6;c++){const p=PAL[c],dr=r-p[0],dg=g-p[1],db=b-p[2],dd=dr*dr+dg*dg+db*db;if(dd<best){best=dd;k=c}}
+    idx[i]=k;const p=PAL[k];od[i*4]=p[0];od[i*4+1]=p[1];od[i*4+2]=p[2];od[i*4+3]=255;
+    const er=(r-p[0])*wt,eg=(g-p[1])*wt,eb=(b-p[2])*wt;
+    if(x+1<N){f[q+3]+=er*7/16;f[q+4]+=eg*7/16;f[q+5]+=eb*7/16}
+    if(y+1<N){
+      const d=q+N*3;
+      if(x>0){f[d-3]+=er*3/16;f[d-2]+=eg*3/16;f[d-1]+=eb*3/16}
+      f[d]+=er*5/16;f[d+1]+=eg*5/16;f[d+2]+=eb*5/16;
+      if(x+1<N){f[d+3]+=er/16;f[d+4]+=eg/16;f[d+5]+=eb/16}
+    }
+  }
+  cx.putImageData(o,0,0);
+  $("#fit").textContent=w!==h&&s>=Math.max(w,h)-1?"Fill":"Fit";
+  $("#send").disabled=busy;
+}
+
+// Two pixels per byte, first pixel in the high 4 bits: 28,800 bytes
+function pack(){const o=new Uint8Array(N*N/2);for(let i=0;i<o.length;i++)o[i]=(idx[2*i]<<4)|idx[2*i+1];return o}
+function b64(u){let t="";for(let i=0;i<u.length;i+=8192)t+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(t)}
+const name=()=>ls.get("nm")||"them";
+const lab=()=>{if(!busy)$("#send").textContent="Send to "+name()};
+
+$("#send").onclick=async()=>{
+  const slot=ls.get("slot");
+  if(!okSlot(slot)){openSheet();toast("Add their slot name first.");return}
+  if(!idx){toast("Choose a photo first.");return}
+  busy=true;$("#send").disabled=true;$("#send").textContent="Sending…";
+  try{
+    const r=await fetch(`${DB}/mailbox/${slot}.json`,{method:"PUT",body:JSON.stringify({id:String(Date.now()),img:b64(pack())})});
+    if(r.ok){$("#send").textContent="Sent ✓";toast(`Sent. Ask ${name()} to press the button on their keychain.`)}
+    else{toast(`Send failed (error ${r.status}). Check the slot name.`)}
+  }catch(e){toast("No connection. Check your internet and try again.")}
+  busy=false;$("#send").disabled=!idx;setTimeout(lab,2200);
+};
+
+// Setup sheet
+const sh=$("#sheet");
+function openSheet(){
+  $("#nm").value=ls.get("nm");$("#slot").value=ls.get("slot");
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!(navigator.standalone||matchMedia("(display-mode: standalone)").matches);
+  $("#ios").hidden=!ios;sh.hidden=false;
+}
+$("#setup").onclick=openSheet;
+$("#save").onclick=()=>{
+  const v=$("#slot").value.trim();
+  if(!okSlot(v)){toast("Slot name: letters and digits only, at least 10.");return}
+  ls.set("slot",v);ls.set("nm",$("#nm").value.trim());sh.hidden=true;lab();
+};
+sh.onclick=e=>{if(e.target===sh&&okSlot(ls.get("slot")))sh.hidden=true};
+lab();render();if(!okSlot(ls.get("slot")))openSheet();
+
+// Offline support and updates
+if("serviceWorker" in navigator&&location.protocol.startsWith("http")){
+  const had=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!busy)location.reload()});
+}
+</script>
+</body>
+</html>
