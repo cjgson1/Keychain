@@ -109,8 +109,9 @@ const $=s=>document.querySelector(s);
 const ls={get:k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const okSlot=v=>/^[A-Za-z0-9]{10,}$/.test(v);
-const P={bright:1,contrast:1,sat:1,dither:1};
-let src,mips=[],w,h,s,sx,sy,fill="#fff",idx=null,tool="bright",busy=false,raf=0,tt;
+const DEF={bright:0.65,contrast:1.40,sat:0.75,dither:0.85};
+const P={bright:0.65,contrast:1.40,sat:0.75,dither:0.85};
+let src,mips=[],w,h,s,sx,sy,fill="#000",idx=null,tool="bright",busy=false,raf=0,tt;
 const cv=$("#cv"),cx=cv.getContext("2d");
 const work=document.createElement("canvas");work.width=work.height=N;
 const wc=work.getContext("2d",{willReadFrequently:true});
@@ -124,16 +125,16 @@ bdr.onclick=()=>{fill=fill==="#fff"?"#000":"#fff";bdl();sched()};bdl();
 function pick(k){
   tool=k;const t=TOOLS.find(t=>t[0]===k),sl=$("#sl");
   document.querySelectorAll(".chip[data-k]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.k===k));
-  sl.min=t[2];sl.max=t[3];sl.step=.05;sl.value=P[k];$("#val").textContent=P[k].toFixed(2);
+  sl.min=t[2];sl.max=t[3];sl.step=.01;sl.value=P[k];$("#val").textContent=P[k].toFixed(2);
 }
 $("#sl").oninput=e=>{P[tool]=+e.target.value;$("#val").textContent=P[tool].toFixed(2);sched()};
-$("#val").onclick=()=>{P[tool]=1;pick(tool);sched()};
+$("#val").onclick=()=>{P[tool]=DEF[tool];pick(tool);sched()};
 pick("bright");
 
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),3400)}
 const ctr=()=>{sx=(w-s)/2;sy=(h-s)/2};
 const pan=()=>{sx=w>=s?clamp(sx,0,w-s):(w-s)/2;sy=h>=s?clamp(sy,0,h-s):(h-s)/2};
-const zlim=v=>clamp(v,Math.min(w,h)/8,Math.max(w,h));
+const zlim=v=>clamp(v,Math.min(w,h)/12,Math.max(w,h));
 
 $("#file").onchange=e=>{
   const f=e.target.files[0];if(!f)return;
@@ -151,7 +152,7 @@ $("#file").onchange=e=>{
   im.src=URL.createObjectURL(f);e.target.value="";
 };
 $("#fit").onclick=()=>{if(!src)return;s=s<Math.max(w,h)-1?Math.max(w,h):Math.min(w,h);ctr();sched()};
-$("#reset").onclick=()=>{Object.keys(P).forEach(k=>P[k]=1);fill="#fff";bdl();pick(tool);if(src){s=Math.min(w,h);ctr()}sched()};
+$("#reset").onclick=()=>{Object.keys(P).forEach(k=>P[k]=DEF[k]);fill="#000";bdl();pick(tool);if(src){s=Math.min(w,h);ctr()}sched()};
 
 // Gestures: one finger pans, two fingers pinch-zoom around the midpoint, wheel zooms on desktop
 const pts=new Map();let g0=null;
