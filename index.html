@@ -94,9 +94,9 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
     <p id="ios" hidden>Tip: tap Share, then Add to Home Screen, to open this like an app. The home-screen app keeps its own settings, so you will enter the slot name again there.</p>
     <label for="nm">Their name (optional)</label>
     <input id="nm" type="text" maxlength="20" autocomplete="off">
-    <label for="slot">Their slot name</label>
+    <label for="slot">Their keychain code</label>
     <input id="slot" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
-    <p>This is the private mailbox for their keychain. Letters and digits only.</p>
+    <p>This is the other persons keychain code. If you don't know what to put in just ask your super handsome and funny boyfriend ;)</p>
     <button class="btn" id="save">Save</button>
   </div>
 </div>
@@ -222,12 +222,12 @@ const lab=()=>{if(!busy)$("#send").textContent="Send to "+name()};
 
 $("#send").onclick=async()=>{
   const slot=ls.get("slot");
-  if(!okSlot(slot)){openSheet();toast("Add their slot name first.");return}
+  if(!okSlot(slot)){openSheet();toast("Add their keychain code first.");return}
   if(!idx){toast("Choose a photo first.");return}
   busy=true;$("#send").disabled=true;$("#send").textContent="Sending…";
   try{
     const r=await fetch(`${DB}/mailbox/${slot}.json`,{method:"PUT",body:JSON.stringify({id:String(Date.now()),img:b64(pack())})});
-    if(r.ok){$("#send").textContent="Sent ✓";toast(`Sent. Ask ${name()} to press the button on their keychain.`)}
+    if(r.ok){$("#send").textContent="Sent ✓";toast(`Sent to ${name()}'s keychain.`)}
     else{toast(`Send failed (error ${r.status}). Check the slot name.`)}
   }catch(e){toast("No connection. Check your internet and try again.")}
   busy=false;$("#send").disabled=!idx;setTimeout(lab,2200);
