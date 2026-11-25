@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Keychain">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#3b3b3b">
 <meta name="theme-color" content="#eef0f4" media="(prefers-color-scheme: light)">
 <style>
@@ -247,10 +247,8 @@ function probe(){
 }
 function fixH(){
   const sa=navigator.standalone||matchMedia("(display-mode: standalone)").matches,sf=probe();
-  // Installed app under a translucent status bar: iOS may report the window shorter than the screen.
-  // That missing strip is below the home-indicator zone, so only a small margin is needed.
-  const dead=sa&&sf.t>0&&innerHeight>innerWidth?Math.max(0,screen.height-innerHeight):0;
-  autoL=Math.max(0,sf.b-dead)+10;
+  // The wheel runs almost to the bottom edge, like the mockup; raise Bottom spacing in Setup for more room
+  autoL=4;
   const tp=ls.get("tp"),bp=ls.get("bp"),R=document.documentElement.style;
   R.setProperty("--tp",(tp!==""?+tp:6)+"px");
   R.setProperty("--L",(bp!==""?+bp:autoL)+"px");
