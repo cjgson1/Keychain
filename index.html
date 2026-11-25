@@ -9,20 +9,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Keychain">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#3b3b3b">
 <meta name="theme-color" content="#eef0f4" media="(prefers-color-scheme: light)">
 <style>
 /* Citadel Script: upload the font file to fonts/CitadelScript.ttf (or change the name here) */
 @font-face{font-family:"Citadel Script";src:url("fonts/CitadelScript.ttf") format("truetype");font-display:swap}
 /* --u is one pixel of the 1080-wide mockup, so everything keeps the mockup's proportions */
-:root{--tp:0px;/* raise (e.g. 36px) to push everything below the iPhone's blurred status-bar zone */
+:root{--tp:0px;
 --u:calc(min(100vw,480px)/1080);--R:calc(var(--u)*270);--L:calc(env(safe-area-inset-bottom,0px) + 12px);
 --ink:#fff;--etx:#fff;--spk:#fff;--bg:#3b3b3b;--pill:#686979;--bez:#686979;--scr:#a8aabf;--whl:#55938b;--snd:#b2b3c2;--stx:#3b3b3b;--line:#5a5b66;--card:#4a4b55;--mute:#b9bacb;
 --script:"Citadel Script","Snell Roundhand","Apple Chancery",cursive;--serif:ui-serif,"New York",Georgia,serif;color-scheme:dark}
 @media (prefers-color-scheme:light){
-:root{--ink:#2b2c33;--etx:#55566a;--bg:#eef0f4;--pill:#6f7088;--bez:#6f7088;--scr:#d3d5e3;--snd:#3b3b3b;--stx:#fff;--line:#c9ccd9;--card:#fff;--mute:#6a6b78;color-scheme:light}
-body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#3b3b3b;z-index:40}}
+:root{--ink:#2b2c33;--etx:#55566a;--bg:#eef0f4;--pill:#6f7088;--bez:#6f7088;--scr:#d3d5e3;--snd:#3b3b3b;--stx:#fff;--line:#c9ccd9;--card:#fff;--mute:#6a6b78;color-scheme:light}}
 *{box-sizing:border-box;margin:0}
 html{height:100%;overflow:hidden;overscroll-behavior:none}
 body{background:var(--bg);color:var(--ink);font:16px/1.4 var(--serif);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding-top:calc(env(safe-area-inset-top,0px) + var(--tp));height:100%}
@@ -253,7 +252,7 @@ function fixH(){
   const dead=sa&&sf.t>0&&innerHeight>innerWidth?Math.max(0,screen.height-innerHeight):0;
   autoL=Math.max(0,sf.b-dead)+10;
   const tp=ls.get("tp"),bp=ls.get("bp"),R=document.documentElement.style;
-  R.setProperty("--tp",(tp!==""?+tp:36)+"px");
+  R.setProperty("--tp",(tp!==""?+tp:6)+"px");
   R.setProperty("--L",(bp!==""?+bp:autoL)+"px");
   fitCv();
 }
@@ -331,7 +330,7 @@ $("#send").onclick=async()=>{
 // Setup sheet
 const sh=$("#sheet");
 function openSheet(){
-  $("#nm").value=ls.get("nm");$("#slot").value=ls.get("slot");$("#tps").value=ls.get("tp")!==""?ls.get("tp"):36;$("#bts").value=ls.get("bp")!==""?ls.get("bp"):autoL;
+  $("#nm").value=ls.get("nm");$("#slot").value=ls.get("slot");$("#tps").value=ls.get("tp")!==""?ls.get("tp"):6;$("#bts").value=ls.get("bp")!==""?ls.get("bp"):autoL;
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!(navigator.standalone||matchMedia("(display-mode: standalone)").matches);
   $("#ios").hidden=!ios;sh.hidden=false;
 }
