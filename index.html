@@ -25,7 +25,7 @@
 body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#3b3b3b;z-index:40}}
 *{box-sizing:border-box;margin:0}
 html{height:100%;overflow:hidden;overscroll-behavior:none}
-body{background:var(--bg);color:var(--ink);font:16px/1.4 var(--serif);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding-top:calc(env(safe-area-inset-top,0px) + var(--tp));position:fixed;top:0;left:0;right:0;height:var(--H,100dvh)}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 var(--serif);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding-top:calc(env(safe-area-inset-top,0px) + var(--tp));height:100%}
 #app{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;position:relative}
 header{position:relative;flex:none;height:calc(var(--u)*300)}
 .heart{position:absolute;left:calc(var(--u)*10);top:calc(var(--u)*10);height:calc(var(--u)*322);width:auto;pointer-events:none;z-index:2}
@@ -72,6 +72,7 @@ header{position:relative;flex:none;height:calc(var(--u)*300)}
 .panel p{font-size:14px;color:var(--mute)}
 .panel label{font:600 13px var(--serif);font-variant:small-caps;letter-spacing:.06em;color:var(--mute)}
 .panel input{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:16px system-ui,sans-serif;-webkit-user-select:text;user-select:text}
+.panel input[type=range]{padding:0;border:0;background:none;accent-color:var(--whl)}
 .btn{height:48px;padding:0 22px;border:0;border-radius:99px;background:var(--pill);color:#fff;font:600 16px var(--serif);font-variant:small-caps;letter-spacing:.04em;cursor:pointer}
 .pbox{display:grid;justify-items:center;gap:14px;padding:20px;color:#fff;width:min(90vw,360px);text-align:center}
 #pvc{display:block;background:#000;box-shadow:0 0 0 8px var(--bez)}
@@ -134,6 +135,10 @@ header{position:relative;flex:none;height:calc(var(--u)*300)}
     <label for="slot">Their keychain code</label>
     <input id="slot" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
     <p>This is the other persons keychain code. If you don't know what to put in just ask your super handsome and funny boyfriend ;)</p>
+    <label for="tps">Top spacing</label>
+    <input id="tps" type="range" min="0" max="90" step="1">
+    <label for="bts">Bottom spacing</label>
+    <input id="bts" type="range" min="0" max="90" step="1">
     <button class="btn" id="save">Save</button>
   </div>
 </div>
@@ -236,17 +241,28 @@ function fitCv(){
   while(k>1&&z+pY>st.clientHeight-8){k--;z=N*k/d}
   cv.style.width=z+"px";fr.style.width=(z+pX)+"px";
 }
+let autoL=12;
+function probe(){
+  const pr=document.createElement("div");pr.style.cssText="position:fixed;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)";
+  document.body.append(pr);const cs=getComputedStyle(pr),r={t:parseFloat(cs.paddingTop)||0,b:parseFloat(cs.paddingBottom)||0};pr.remove();return r;
+}
 function fixH(){
-  const sa=navigator.standalone||matchMedia("(display-mode: standalone)").matches;
-  const h=sa&&innerHeight>innerWidth?Math.max(innerHeight,screen.height):innerHeight;
-  document.documentElement.style.setProperty("--H",h+"px");fitCv();
+  const sa=navigator.standalone||matchMedia("(display-mode: standalone)").matches,sf=probe();
+  // Installed app under a translucent status bar: iOS may report the window shorter than the screen.
+  // That missing strip is below the home-indicator zone, so only a small margin is needed.
+  const dead=sa&&sf.t>0&&innerHeight>innerWidth?Math.max(0,screen.height-innerHeight):0;
+  autoL=Math.max(0,sf.b-dead)+10;
+  const tp=ls.get("tp"),bp=ls.get("bp"),R=document.documentElement.style;
+  R.setProperty("--tp",(tp!==""?+tp:36)+"px");
+  R.setProperty("--L",(bp!==""?+bp:autoL)+"px");
+  fitCv();
 }
 addEventListener("resize",fixH);addEventListener("orientationchange",()=>setTimeout(fixH,250));fixH();
 // Tap the title 5 times quickly to see screen measurements (for troubleshooting)
 let tc=0,tl=0;$(".title").onclick=()=>{
   const n=Date.now();tc=n-tl<600?tc+1:1;tl=n;if(tc<5)return;tc=0;
   const pr=document.createElement("div");pr.style.cssText="position:fixed;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)";document.body.append(pr);
-  const cs=getComputedStyle(pr);toast(`window ${innerWidth}x${innerHeight}, screen ${screen.width}x${screen.height}, safe ${cs.paddingTop}/${cs.paddingBottom}, app ${$("#app").offsetHeight}`);pr.remove();
+  const cs=getComputedStyle(pr);toast(`window ${innerWidth}x${innerHeight}, screen ${screen.width}x${screen.height}, safe ${cs.paddingTop}/${cs.paddingBottom}, app ${$("#app").offsetHeight}, bottom space ${autoL}`);pr.remove();
 };
 const sched=()=>{if(!raf)raf=requestAnimationFrame(render)};
 function render(){
@@ -315,11 +331,13 @@ $("#send").onclick=async()=>{
 // Setup sheet
 const sh=$("#sheet");
 function openSheet(){
-  $("#nm").value=ls.get("nm");$("#slot").value=ls.get("slot");
+  $("#nm").value=ls.get("nm");$("#slot").value=ls.get("slot");$("#tps").value=ls.get("tp")!==""?ls.get("tp"):36;$("#bts").value=ls.get("bp")!==""?ls.get("bp"):autoL;
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!(navigator.standalone||matchMedia("(display-mode: standalone)").matches);
   $("#ios").hidden=!ios;sh.hidden=false;
 }
 $("#setup").onclick=openSheet;
+$("#tps").oninput=e=>{ls.set("tp",e.target.value);fixH()};
+$("#bts").oninput=e=>{ls.set("bp",e.target.value);fixH()};
 $("#save").onclick=()=>{
   const v=$("#slot").value.trim();
   if(!okSlot(v)){toast("Slot name: letters and digits only, at least 10.");return}
