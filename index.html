@@ -9,85 +9,121 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Keychain">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#e4e7e2" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#121617" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#3b3b3b">
+<meta name="theme-color" content="#eef0f4" media="(prefers-color-scheme: light)">
 <style>
-:root{--bg:#e4e7e2;--ink:#161a1b;--mute:#667068;--card:#f3f5f1;--line:#c8cec8;--acc:#2157ba;--on:#f3f5f1;color-scheme:light}
-@media (prefers-color-scheme:dark){:root{--bg:#121617;--ink:#e9ece8;--mute:#8e9993;--card:#1c2224;--line:#2f383a;--acc:#7aa2f0;--on:#121617;color-scheme:dark}}
+/* Citadel Script: upload the font file to fonts/CitadelScript.ttf (or change the name here) */
+@font-face{font-family:"Citadel Script";src:url("fonts/CitadelScript.ttf") format("truetype");font-display:swap}
+/* --u is one pixel of the 1080-wide mockup, so everything keeps the mockup's proportions */
+:root{--u:calc(min(100vw,480px)/1080);--R:calc(var(--u)*270);--L:calc(env(safe-area-inset-bottom,0px) + 12px);
+--ink:#fff;--etx:#fff;--spk:#fff;--bg:#3b3b3b;--pill:#686979;--bez:#686979;--scr:#a8aabf;--whl:#55938b;--snd:#b2b3c2;--stx:#3b3b3b;--line:#5a5b66;--card:#4a4b55;--mute:#b9bacb;
+--script:"Citadel Script","Snell Roundhand","Apple Chancery",cursive;--serif:ui-serif,"New York",Georgia,serif;color-scheme:dark}
+@media (prefers-color-scheme:light){
+:root{--ink:#2b2c33;--etx:#55566a;--bg:#eef0f4;--pill:#6f7088;--bez:#6f7088;--scr:#d3d5e3;--snd:#3b3b3b;--stx:#fff;--line:#c9ccd9;--card:#fff;--mute:#6a6b78;color-scheme:light}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#3b3b3b;z-index:40}}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;overscroll-behavior:none}
-body{background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,sans-serif;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding-top:env(safe-area-inset-top)}
-#app{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column}
-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px}
-.brand{display:flex;align-items:center;gap:10px;font:600 24px ui-serif,Georgia,serif;letter-spacing:-.01em}
-.dots{display:flex;gap:4px}.dots i{width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(128,128,128,.35)}
-.pill{font:500 12px ui-monospace,Menlo,monospace;letter-spacing:.04em;text-transform:uppercase;padding:9px 14px;border:1px solid var(--line);border-radius:99px;background:var(--card);color:var(--ink)}
-#stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
-.frame{position:relative;width:min(92vw,calc(100dvh - 370px),360px);min-width:230px;padding:40px 14px 14px;background:var(--card);border:1px solid var(--line);border-radius:28px;box-shadow:0 18px 40px -22px rgba(0,0,0,.4)}
-.frame::before{content:"";position:absolute;top:14px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--bg);box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
-#cv{display:block;margin:0 auto;width:100%;aspect-ratio:1;image-rendering:pixelated;touch-action:none;border-radius:6px;background:#fff;cursor:grab}
-#empty{position:absolute;inset:40px 14px 14px;display:grid;place-content:center;gap:6px;text-align:center;border:1.5px dashed var(--line);border-radius:6px;background:var(--card);cursor:pointer}
-#empty b{font:600 20px ui-serif,Georgia,serif}#empty span{font-size:13px;color:var(--mute)}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 var(--serif);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding-top:env(safe-area-inset-top)}
+#app{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;position:relative}
+header{position:relative;flex:none;height:calc(var(--u)*300)}
+.heart{position:absolute;left:calc(var(--u)*10);top:calc(var(--u)*10);height:calc(var(--u)*322);width:auto;pointer-events:none;z-index:2}
+.title{position:absolute;left:0;right:0;top:calc(var(--u)*4);text-align:center;font:400 calc(var(--u)*64)/calc(var(--u)*72) var(--script);white-space:nowrap}
+.pill{position:relative;display:block;height:max(26px,calc(var(--u)*64));padding:0 calc(var(--u)*20);border:0;border-radius:99px;background:var(--pill);color:#fff;font:600 max(11.5px,calc(var(--u)*38))/max(26px,calc(var(--u)*64)) var(--serif);font-variant:small-caps;letter-spacing:.03em;white-space:nowrap;cursor:pointer}
+.pill::after{content:"";position:absolute;inset:-9px -6px}
+#setup{position:absolute;right:calc(var(--u)*32);top:calc(var(--u)*23)}
+#pv{position:absolute;left:50%;top:calc(var(--u)*177);transform:translateX(-50%)}
+#ph{position:absolute;right:calc(var(--u)*32);top:calc(var(--u)*177)}
+#stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center}
+#stage::before,#stage::after{content:"";display:block}
+#stage::before{flex:1}#stage::after{flex:1.8}
+.frame{position:relative;padding:calc(var(--u)*48) calc(var(--u)*30) calc(var(--u)*22);background:var(--bez);border-radius:calc(var(--u)*52)}
+.frame::before{content:"";position:absolute;top:calc(var(--u)*12);left:50%;width:calc(var(--u)*26);height:calc(var(--u)*26);margin-left:calc(var(--u)*-13);border-radius:50%;background:var(--bg)}
+#cv{display:block;margin:0 auto;width:100%;aspect-ratio:1;image-rendering:pixelated;touch-action:none;background:#000;cursor:grab}
+#empty{position:absolute;top:calc(var(--u)*48);left:calc(var(--u)*30);right:calc(var(--u)*30);bottom:calc(var(--u)*22);display:grid;place-content:center;gap:4px;text-align:center;background:var(--scr);color:var(--etx);cursor:pointer;font:300 max(14px,calc(var(--u)*42)) system-ui,-apple-system,sans-serif}
+#empty span{font-size:12px;opacity:.85}
 .has #empty{display:none}
-#hint{height:16px;font:12px ui-monospace,Menlo,monospace;letter-spacing:.02em;color:var(--mute)}
-#dock{padding:8px 20px calc(14px + env(safe-area-inset-bottom));display:grid;gap:12px}
-.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:0 20px}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;padding:10px 15px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--mute);font:500 14px system-ui,sans-serif}
-.chip[aria-pressed=true]{background:var(--ink);color:var(--on);border-color:var(--ink)}
-.slide{display:flex;align-items:center;gap:12px}
-.val{min-width:54px;padding:6px 0;border:0;background:none;color:var(--mute);font:500 13px ui-monospace,Menlo,monospace;text-align:right}
-input[type=range]{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:32px;background:transparent}
-input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-12px;border-radius:50%;background:var(--ink);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--line)}
-input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
-input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
-.row{display:flex;gap:8px}
-.btn{height:50px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 15px system-ui,sans-serif;display:grid;place-items:center;cursor:pointer}
-#send,#save{background:var(--ink);color:var(--on);border-color:var(--ink)}
-#send{flex:1;min-width:0;padding:0 16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:48px;text-align:center}
-#send:disabled{opacity:.4}
-:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#dock{position:relative;flex:none;height:calc(var(--L) + var(--u)*440)}
+.tier{z-index:2;position:absolute;left:0;right:0;bottom:calc(var(--L) + var(--y)*var(--u));transform:translateY(50%);display:grid;grid-template-columns:1fr var(--g) 1fr;align-items:center;pointer-events:none}
+.tier>*{pointer-events:auto}
+.tier>:first-child{justify-self:end}.tier>:last-child{justify-self:start}.tier>i{display:block}
+.t1{--y:318;--g:auto;column-gap:calc(var(--u)*34)}
+.t2{--y:206;--g:calc(var(--u)*480)}
+.t3{--y:114;--g:calc(var(--u)*660)}
+.pill[aria-pressed=true]{background:var(--whl)}
+.send{justify-self:center;transform:translateY(calc(var(--u)*-55));height:max(40px,calc(var(--u)*100));padding:0 calc(var(--u)*52);background:var(--snd);color:var(--stx);font-size:max(17px,calc(var(--u)*48));line-height:max(40px,calc(var(--u)*100))}
+.send:disabled{opacity:.7}
+#wheelwrap{position:absolute;left:50%;bottom:var(--L);width:calc(var(--R)*2);height:var(--R);margin-left:calc(var(--R)*-1);overflow:hidden;border-radius:var(--R) var(--R) 0 0;touch-action:none;cursor:grab}
+#whl{position:absolute;left:0;top:0;width:100%;height:calc(var(--R)*2)}
+#val{position:absolute;left:50%;bottom:calc(var(--R)*-.475);width:calc(var(--R)*.95);height:calc(var(--R)*.95);margin-left:calc(var(--R)*-.475);border-radius:50%;border:2px solid #fff;background:var(--whl);color:#fff;padding:7px 0 0;display:flex;flex-direction:column;align-items:center;font-family:var(--serif)}
+#val small{font-size:10px;font-variant:small-caps;letter-spacing:.08em;line-height:1.2}
+#val b{font-size:20px;line-height:1.1;font-weight:600}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-#toast{position:fixed;left:50%;bottom:calc(178px + env(safe-area-inset-bottom));transform:translate(-50%,8px);max-width:min(90vw,420px);padding:11px 16px;border-radius:14px;background:var(--ink);color:var(--on);font-size:14px;text-align:center;opacity:0;pointer-events:none;transition:.25s;z-index:9}
+#toast{position:fixed;left:50%;bottom:calc(var(--L) + var(--u)*440 + 8px);transform:translate(-50%,6px);max-width:min(90vw,420px);padding:10px 16px;border-radius:14px;background:var(--pill);color:#fff;font-size:14px;text-align:center;opacity:0;pointer-events:none;transition:.25s;z-index:30}
 #toast.on{opacity:1;transform:translate(-50%,0)}
-#sheet{position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.45);z-index:5}
-#sheet[hidden]{display:none}
+#sheet,#pvw{position:fixed;inset:0;z-index:15}
+#sheet{display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5)}
+#pvw{display:grid;place-items:center;background:rgba(0,0,0,.85)}
+#sheet[hidden],#pvw[hidden]{display:none}
 .panel{width:100%;max-width:480px;background:var(--bg);border-radius:24px 24px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));display:grid;gap:10px}
-.panel h2{font:600 22px ui-serif,Georgia,serif}
+.panel h2{font:600 22px var(--serif)}
 .panel p{font-size:14px;color:var(--mute)}
-.panel label{font:500 12px ui-monospace,Menlo,monospace;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.panel label{font:600 13px var(--serif);font-variant:small-caps;letter-spacing:.06em;color:var(--mute)}
 .panel input{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:16px system-ui,sans-serif;-webkit-user-select:text;user-select:text}
+.btn{height:48px;padding:0 22px;border:0;border-radius:99px;background:var(--pill);color:#fff;font:600 16px var(--serif);font-variant:small-caps;letter-spacing:.04em;cursor:pointer}
+.pbox{display:grid;justify-items:center;gap:14px;padding:20px;color:#fff;width:min(90vw,360px);text-align:center}
+#pvc{display:block;background:#000;box-shadow:0 0 0 8px var(--bez)}
+.pbox p{font-size:13px;color:#cfd0dc}
+.pbox input{width:100%;accent-color:var(--whl)}
 @media (prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <div class="brand">Keychain<span class="dots" id="dots" aria-hidden="true"></span></div>
+    <picture><source media="(prefers-color-scheme: light)" srcset="heart-light.png"><img class="heart" src="heart-dark.png" alt="C plus A"></picture>
+    <div class="title">For You and Me</div>
     <button class="pill" id="setup">Setup</button>
+    <button class="pill" id="pv">Preview</button>
+    <label class="pill" id="ph" for="file">Photo</label>
   </header>
   <main id="stage">
     <div class="frame">
       <canvas id="cv" width="240" height="240" aria-label="Preview of the photo on the e-ink screen. Drag to move, pinch to zoom."></canvas>
-      <label id="empty" for="file"><b>Choose a photo</b><span>then drag and pinch to frame it</span></label>
+      <label id="empty" for="file">Image Preview<span>tap to choose a photo</span></label>
     </div>
-    <div id="hint"></div>
   </main>
-  <section id="dock">
-    <div class="chips" id="chips" role="group" aria-label="Adjustments"></div>
-    <div class="slide"><input id="sl" type="range" aria-label="Adjustment amount"><button class="val" id="val" aria-label="Reset this adjustment"></button></div>
-    <div class="row">
-      <label class="btn" for="file">Photo</label>
-      <button class="btn" id="fit">Fit</button>
-      <button class="btn" id="reset">Reset</button>
-      <button class="btn" id="send" disabled>Send</button>
+  <section id="dock" aria-label="Adjustments">
+    <div class="tier t1">
+      <button class="pill tp" data-k="contrast">Contrast</button>
+      <button class="pill send" id="send" disabled>Send!</button>
+      <button class="pill tp" data-k="sat">Color</button>
+    </div>
+    <div class="tier t2">
+      <button class="pill tp" data-k="bright">Brightness</button><i></i>
+      <button class="pill tp" data-k="dither">Dither</button>
+    </div>
+    <div class="tier t3">
+      <button class="pill" id="reset">Reset</button><i></i>
+      <button class="pill" id="fit">Fit</button>
+    </div>
+    <div id="wheelwrap" role="slider" tabindex="0" aria-label="Adjustment wheel">
+      <svg id="whl" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
+      <button id="val" aria-label="Reset this adjustment"></button>
     </div>
   </section>
 </div>
 <input id="file" class="vh" type="file" accept="image/*">
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="pvw" hidden>
+  <div class="pbox">
+    <canvas id="pvc" width="240" height="240" aria-label="Photo at the real size of the keychain screen"></canvas>
+    <p>This is about the real size of the 1.54" screen. Slide to match it to your actual screen.</p>
+    <input id="pvs" type="range" min="110" max="260" step="1" aria-label="Preview size">
+    <button class="btn" id="pvx">Close</button>
+  </div>
+</div>
 <div id="sheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="st">
     <h2 id="st">Setup</h2>
@@ -101,7 +137,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   </div>
 </div>
 <script>
-const DB="https://keychain-b8a5e-default-rtdb.firebaseio.com",N=240;
+const DB="https://keychain-b8a5e-default-rtdb.firebaseio.com",N=240,TURNS=1.5;
 // 0 black, 1 white, 2 red, 3 yellow, 4 blue, 5 green (colors from the Python preview tool)
 const PAL=[[0,0,0],[255,255,255],[160,32,32],[240,224,80],[80,128,184],[96,128,80]];
 const TOOLS=[["bright","Brightness",0,3],["contrast","Contrast",0,3],["sat","Color",0,3],["dither","Dither",0,1]];
@@ -111,24 +147,39 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const okSlot=v=>/^[A-Za-z0-9]{10,}$/.test(v);
 const DEF={bright:0.65,contrast:1.40,sat:0.75,dither:0.85};
 const P={bright:0.65,contrast:1.40,sat:0.75,dither:0.85};
-let src,mips=[],w,h,s,sx,sy,fill="#000",idx=null,tool="bright",busy=false,raf=0,tt;
+let src,mips=[],w,h,s,sx,sy,fill="#000",idx=null,tool="bright",busy=false,raf=0,tt,wv=0;
 const cv=$("#cv"),cx=cv.getContext("2d");
 const work=document.createElement("canvas");work.width=work.height=N;
 const wc=work.getContext("2d",{willReadFrequently:true});
+const tdef=()=>TOOLS.find(t=>t[0]===tool);
 
-PAL.forEach(c=>{const i=document.createElement("i");i.style.background="rgb("+c+")";$("#dots").append(i)});
-TOOLS.forEach(([k,l])=>{const b=document.createElement("button");b.className="chip";b.textContent=l;b.dataset.k=k;b.onclick=()=>pick(k);$("#chips").append(b)});
-const bdr=document.createElement("button");bdr.className="chip";$("#chips").append(bdr);
-const bdl=()=>{bdr.textContent="Border: "+(fill==="#fff"?"White":"Black")};
-bdr.onclick=()=>{fill=fill==="#fff"?"#000":"#fff";bdl();sched()};bdl();
+// Wheel graphic: 12 spokes that turn with the value
+const whl=$("#whl"),wrap=$("#wheelwrap");
+let g='<circle r="100" style="fill:var(--whl)"/>';
+for(let i=0;i<12;i++){const a=i*Math.PI/6;g+=`<line x2="${(100*Math.cos(a)).toFixed(1)}" y2="${(100*Math.sin(a)).toFixed(1)}" style="stroke:var(--spk)" stroke-width="1.6"/>`}
+whl.innerHTML=g;whl.style.transformOrigin="50% 50%";
 
-function pick(k){
-  tool=k;const t=TOOLS.find(t=>t[0]===k),sl=$("#sl");
-  document.querySelectorAll(".chip[data-k]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.k===k));
-  sl.min=t[2];sl.max=t[3];sl.step=.01;sl.value=P[k];$("#val").textContent=P[k].toFixed(2);
+function show(){
+  const t=tdef(),v=P[tool];
+  $("#val").innerHTML=`<small>${t[1]}</small><b>${v.toFixed(2)}</b>`;
+  whl.style.transform=`rotate(${(v-t[2])/(t[3]-t[2])*360*TURNS}deg)`;
+  wrap.setAttribute("aria-valuemin",t[2]);wrap.setAttribute("aria-valuemax",t[3]);wrap.setAttribute("aria-valuenow",v);
 }
-$("#sl").oninput=e=>{P[tool]=+e.target.value;$("#val").textContent=P[tool].toFixed(2);sched()};
-$("#val").onclick=()=>{P[tool]=DEF[tool];pick(tool);sched()};
+function pick(k){tool=k;document.querySelectorAll(".tp[data-k]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===k));wv=P[k];show()}
+function setVal(v){const t=tdef();P[tool]=Math.round(clamp(v,t[2],t[3])*100)/100;show();sched()}
+document.querySelectorAll(".tp[data-k]").forEach(b=>b.onclick=()=>pick(b.dataset.k));
+$("#val").onpointerdown=e=>e.stopPropagation();
+$("#val").onclick=()=>{P[tool]=DEF[tool];wv=P[tool];show();sched()};
+let la=null;
+const ang=e=>{const r=wrap.getBoundingClientRect();return Math.atan2(e.clientY-r.bottom,e.clientX-(r.left+r.width/2))};
+wrap.onpointerdown=e=>{wrap.setPointerCapture(e.pointerId);la=ang(e);wv=P[tool]};
+wrap.onpointermove=e=>{
+  if(la===null)return;
+  const a=ang(e);let d=a-la;if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;la=a;
+  const t=tdef();wv=clamp(wv+d/(2*Math.PI*TURNS)*(t[3]-t[2]),t[2],t[3]);setVal(wv);
+};
+wrap.onpointerup=wrap.onpointercancel=()=>{la=null};
+wrap.onkeydown=e=>{const d={ArrowRight:.01,ArrowUp:.01,ArrowLeft:-.01,ArrowDown:-.01}[e.key];if(d){e.preventDefault();wv=P[tool]+d;setVal(wv)}};
 pick("bright");
 
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),3400)}
@@ -146,13 +197,13 @@ $("#file").onchange=e=>{
     src.getContext("2d").drawImage(im,0,0,w,h);URL.revokeObjectURL(im.src);
     mips=[src];
     while(Math.min(mips[mips.length-1].width,mips[mips.length-1].height)>=N*2){const p=mips[mips.length-1],c=document.createElement("canvas");c.width=Math.max(1,p.width>>1);c.height=Math.max(1,p.height>>1);const q=c.getContext("2d");q.imageSmoothingQuality="high";q.drawImage(p,0,0,c.width,c.height);mips.push(c)}
-    s=Math.min(w,h);ctr();$("#stage").classList.add("has");$("#hint").textContent="Drag to move · pinch to zoom";sched();
+    s=Math.min(w,h);ctr();$("#stage").classList.add("has");toast("Drag to move · pinch to zoom");sched();
   };
   im.onerror=()=>toast("Couldn’t open that photo. Try another one.");
   im.src=URL.createObjectURL(f);e.target.value="";
 };
 $("#fit").onclick=()=>{if(!src)return;s=s<Math.max(w,h)-1?Math.max(w,h):Math.min(w,h);ctr();sched()};
-$("#reset").onclick=()=>{Object.keys(P).forEach(k=>P[k]=DEF[k]);fill="#000";bdl();pick(tool);if(src){s=Math.min(w,h);ctr()}sched()};
+$("#reset").onclick=()=>{Object.keys(P).forEach(k=>P[k]=DEF[k]);wv=P[tool];show();if(src){s=Math.min(w,h);ctr()}sched()};
 
 // Gestures: one finger pans, two fingers pinch-zoom around the midpoint, wheel zooms on desktop
 const pts=new Map();let g0=null;
@@ -175,12 +226,20 @@ cv.addEventListener("wheel",e=>{
   s=zlim(s*Math.exp(e.deltaY*.002));sx=ax-x*s;sy=ay-y*s;pan();sched();
 },{passive:false});
 
-function fitCv(){const fr=cv.parentElement;fr.style.width="";const d=window.devicePixelRatio||1,av=fr.clientWidth-28,k=Math.max(1,Math.floor(av*d/N)),z=N*k/d;cv.style.width=z+"px";fr.style.width=(z+30)+"px"}
+// Show the canvas at a whole-number multiple of device pixels so dither pixels stay even
+function fitCv(){
+  const fr=cv.parentElement,st=$("#stage");fr.style.width="";cv.style.width="";
+  const cs=getComputedStyle(fr),pX=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight),pY=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
+  const d=window.devicePixelRatio||1,W=Math.min(innerWidth,480);
+  let k=Math.max(1,Math.floor(W*.66*d/N)),z=N*k/d;
+  while(k>1&&z+pY>st.clientHeight-8){k--;z=N*k/d}
+  cv.style.width=z+"px";fr.style.width=(z+pX)+"px";
+}
 addEventListener("resize",fitCv);fitCv();
 const sched=()=>{if(!raf)raf=requestAnimationFrame(render)};
 function render(){
   raf=0;
-  if(!src){cx.fillStyle="#fff";cx.fillRect(0,0,N,N);return}
+  if(!src){cx.fillStyle="#000";cx.fillRect(0,0,N,N);return}
   wc.fillStyle=fill;wc.fillRect(0,0,N,N);wc.imageSmoothingQuality="high";
   const x0=Math.max(sx,0),y0=Math.max(sy,0),x1=Math.min(sx+s,w),y1=Math.min(sy+s,h);
   let l=0;while(l+1<mips.length&&s/Math.pow(2,l+1)>=N)l++;
@@ -214,11 +273,19 @@ function render(){
   $("#send").disabled=busy;
 }
 
+// True-size preview: about 1.09 in (28 mm) square, tuned once to your phone with the slider
+const pvc=$("#pvc"),pvw=$("#pvw");
+function pvSize(){const z=+ls.get("pv")||170;pvc.style.width=pvc.style.height=z+"px";$("#pvs").value=z}
+$("#pv").onclick=()=>{if(!idx){toast("Choose a photo first.");return}pvc.getContext("2d").drawImage(cv,0,0);pvSize();pvw.hidden=false};
+$("#pvs").oninput=e=>{ls.set("pv",e.target.value);pvSize()};
+$("#pvx").onclick=()=>{pvw.hidden=true};
+pvw.onclick=e=>{if(e.target===pvw)pvw.hidden=true};
+
 // Two pixels per byte, first pixel in the high 4 bits: 28,800 bytes
 function pack(){const o=new Uint8Array(N*N/2);for(let i=0;i<o.length;i++)o[i]=(idx[2*i]<<4)|idx[2*i+1];return o}
 function b64(u){let t="";for(let i=0;i<u.length;i+=8192)t+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(t)}
 const name=()=>ls.get("nm")||"them";
-const lab=()=>{if(!busy)$("#send").textContent="Send to "+name()};
+const lab=()=>{if(!busy)$("#send").textContent="Send!"};
 
 $("#send").onclick=async()=>{
   const slot=ls.get("slot");
