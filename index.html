@@ -16,20 +16,21 @@
 /* Citadel Script: upload the font file to fonts/CitadelScript.ttf (or change the name here) */
 @font-face{font-family:"Citadel Script";src:url("fonts/CitadelScript.ttf") format("truetype");font-display:swap}
 /* --u is one pixel of the 1080-wide mockup, so everything keeps the mockup's proportions */
-:root{--u:calc(min(100vw,480px)/1080);--R:calc(var(--u)*270);--L:calc(env(safe-area-inset-bottom,0px) + 12px);
+:root{--tp:0px;/* raise (e.g. 36px) to push everything below the iPhone's blurred status-bar zone */
+--u:calc(min(100vw,480px)/1080);--R:calc(var(--u)*270);--L:calc(env(safe-area-inset-bottom,0px) + 12px);
 --ink:#fff;--etx:#fff;--spk:#fff;--bg:#3b3b3b;--pill:#686979;--bez:#686979;--scr:#a8aabf;--whl:#55938b;--snd:#b2b3c2;--stx:#3b3b3b;--line:#5a5b66;--card:#4a4b55;--mute:#b9bacb;
 --script:"Citadel Script","Snell Roundhand","Apple Chancery",cursive;--serif:ui-serif,"New York",Georgia,serif;color-scheme:dark}
 @media (prefers-color-scheme:light){
 :root{--ink:#2b2c33;--etx:#55566a;--bg:#eef0f4;--pill:#6f7088;--bez:#6f7088;--scr:#d3d5e3;--snd:#3b3b3b;--stx:#fff;--line:#c9ccd9;--card:#fff;--mute:#6a6b78;color-scheme:light}
 body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#3b3b3b;z-index:40}}
 *{box-sizing:border-box;margin:0}
-html,body{height:100%;overscroll-behavior:none}
-body{background:var(--bg);color:var(--ink);font:16px/1.4 var(--serif);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding-top:env(safe-area-inset-top)}
+html{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 var(--serif);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding-top:calc(env(safe-area-inset-top,0px) + var(--tp));position:fixed;top:0;left:0;right:0;height:var(--H,100dvh)}
 #app{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;position:relative}
 header{position:relative;flex:none;height:calc(var(--u)*300)}
 .heart{position:absolute;left:calc(var(--u)*10);top:calc(var(--u)*10);height:calc(var(--u)*322);width:auto;pointer-events:none;z-index:2}
 .title{position:absolute;left:0;right:0;top:calc(var(--u)*4);text-align:center;font:400 calc(var(--u)*64)/calc(var(--u)*72) var(--script);white-space:nowrap}
-.pill{position:relative;display:block;height:max(26px,calc(var(--u)*64));padding:0 calc(var(--u)*20);border:0;border-radius:99px;background:var(--pill);color:#fff;font:600 max(11.5px,calc(var(--u)*38))/max(26px,calc(var(--u)*64)) var(--serif);font-variant:small-caps;letter-spacing:.03em;white-space:nowrap;cursor:pointer}
+.pill{position:relative;display:block;height:max(30px,calc(var(--u)*72));padding:0 calc(var(--u)*18);border:0;border-radius:99px;background:var(--pill);color:#fff;font:600 max(13px,calc(var(--u)*42))/max(30px,calc(var(--u)*72)) var(--serif);font-variant:small-caps;letter-spacing:.02em;white-space:nowrap;cursor:pointer}
 .pill::after{content:"";position:absolute;inset:-9px -6px}
 #setup{position:absolute;right:calc(var(--u)*32);top:calc(var(--u)*23)}
 #pv{position:absolute;left:50%;top:calc(var(--u)*177);transform:translateX(-50%)}
@@ -39,7 +40,7 @@ header{position:relative;flex:none;height:calc(var(--u)*300)}
 #stage::before{flex:1}#stage::after{flex:1.8}
 .frame{position:relative;padding:calc(var(--u)*48) calc(var(--u)*30) calc(var(--u)*22);background:var(--bez);border-radius:calc(var(--u)*52)}
 .frame::before{content:"";position:absolute;top:calc(var(--u)*12);left:50%;width:calc(var(--u)*26);height:calc(var(--u)*26);margin-left:calc(var(--u)*-13);border-radius:50%;background:var(--bg)}
-#cv{display:block;margin:0 auto;width:100%;aspect-ratio:1;image-rendering:pixelated;touch-action:none;background:#000;cursor:grab}
+#cv{display:block;margin:0 auto;width:100%;aspect-ratio:1;image-rendering:pixelated;touch-action:none;background:var(--scr);cursor:grab}
 #empty{position:absolute;top:calc(var(--u)*48);left:calc(var(--u)*30);right:calc(var(--u)*30);bottom:calc(var(--u)*22);display:grid;place-content:center;gap:4px;text-align:center;background:var(--scr);color:var(--etx);cursor:pointer;font:300 max(14px,calc(var(--u)*42)) system-ui,-apple-system,sans-serif}
 #empty span{font-size:12px;opacity:.85}
 .has #empty{display:none}
@@ -48,10 +49,10 @@ header{position:relative;flex:none;height:calc(var(--u)*300)}
 .tier>*{pointer-events:auto}
 .tier>:first-child{justify-self:end}.tier>:last-child{justify-self:start}.tier>i{display:block}
 .t1{--y:318;--g:auto;column-gap:calc(var(--u)*34)}
-.t2{--y:206;--g:calc(var(--u)*480)}
+.t2{--y:212;--g:calc(var(--u)*460)}
 .t3{--y:114;--g:calc(var(--u)*660)}
 .pill[aria-pressed=true]{background:var(--whl)}
-.send{justify-self:center;transform:translateY(calc(var(--u)*-55));height:max(40px,calc(var(--u)*100));padding:0 calc(var(--u)*52);background:var(--snd);color:var(--stx);font-size:max(17px,calc(var(--u)*48));line-height:max(40px,calc(var(--u)*100))}
+.send{justify-self:center;transform:translateY(calc(var(--u)*-55));height:max(44px,calc(var(--u)*112));padding:0 calc(var(--u)*52);background:var(--snd);color:var(--stx);font-size:max(19px,calc(var(--u)*54));line-height:max(44px,calc(var(--u)*112))}
 .send:disabled{opacity:.7}
 #wheelwrap{position:absolute;left:50%;bottom:var(--L);width:calc(var(--R)*2);height:var(--R);margin-left:calc(var(--R)*-1);overflow:hidden;border-radius:var(--R) var(--R) 0 0;touch-action:none;cursor:grab}
 #whl{position:absolute;left:0;top:0;width:100%;height:calc(var(--R)*2)}
@@ -235,11 +236,22 @@ function fitCv(){
   while(k>1&&z+pY>st.clientHeight-8){k--;z=N*k/d}
   cv.style.width=z+"px";fr.style.width=(z+pX)+"px";
 }
-addEventListener("resize",fitCv);fitCv();
+function fixH(){
+  const sa=navigator.standalone||matchMedia("(display-mode: standalone)").matches;
+  const h=sa&&innerHeight>innerWidth?Math.max(innerHeight,screen.height):innerHeight;
+  document.documentElement.style.setProperty("--H",h+"px");fitCv();
+}
+addEventListener("resize",fixH);addEventListener("orientationchange",()=>setTimeout(fixH,250));fixH();
+// Tap the title 5 times quickly to see screen measurements (for troubleshooting)
+let tc=0,tl=0;$(".title").onclick=()=>{
+  const n=Date.now();tc=n-tl<600?tc+1:1;tl=n;if(tc<5)return;tc=0;
+  const pr=document.createElement("div");pr.style.cssText="position:fixed;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)";document.body.append(pr);
+  const cs=getComputedStyle(pr);toast(`window ${innerWidth}x${innerHeight}, screen ${screen.width}x${screen.height}, safe ${cs.paddingTop}/${cs.paddingBottom}, app ${$("#app").offsetHeight}`);pr.remove();
+};
 const sched=()=>{if(!raf)raf=requestAnimationFrame(render)};
 function render(){
   raf=0;
-  if(!src){cx.fillStyle="#000";cx.fillRect(0,0,N,N);return}
+  if(!src){cx.clearRect(0,0,N,N);return}
   wc.fillStyle=fill;wc.fillRect(0,0,N,N);wc.imageSmoothingQuality="high";
   const x0=Math.max(sx,0),y0=Math.max(sy,0),x1=Math.min(sx+s,w),y1=Math.min(sy+s,h);
   let l=0;while(l+1<mips.length&&s/Math.pow(2,l+1)>=N)l++;
