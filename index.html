@@ -250,7 +250,7 @@ function fixH(){
   // The wheel runs almost to the bottom edge, like the mockup; raise Bottom spacing in Setup for more room
   autoL=4;
   const tp=ls.get("tp"),bp=ls.get("bp"),R=document.documentElement.style;
-  R.setProperty("--tp",(tp!==""?+tp:6)+"px");
+  R.setProperty("--tp",(tp!==""?+tp:12)+"px");
   R.setProperty("--L",(bp!==""?+bp:autoL)+"px");
   fitCv();
 }
@@ -328,7 +328,7 @@ $("#send").onclick=async()=>{
 // Setup sheet
 const sh=$("#sheet");
 function openSheet(){
-  $("#nm").value=ls.get("nm");$("#slot").value=ls.get("slot");$("#tps").value=ls.get("tp")!==""?ls.get("tp"):6;$("#bts").value=ls.get("bp")!==""?ls.get("bp"):autoL;
+  $("#nm").value=ls.get("nm");$("#slot").value=ls.get("slot");$("#tps").value=ls.get("tp")!==""?ls.get("tp"):12;$("#bts").value=ls.get("bp")!==""?ls.get("bp"):autoL;
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!(navigator.standalone||matchMedia("(display-mode: standalone)").matches);
   $("#ios").hidden=!ios;sh.hidden=false;
 }
