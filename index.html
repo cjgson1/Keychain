@@ -55,9 +55,11 @@ header{position:relative;flex:none;height:calc(var(--u)*300)}
 .send:disabled{opacity:.7}
 #wheelwrap{position:absolute;left:50%;bottom:var(--L);width:calc(var(--R)*2);height:var(--R);margin-left:calc(var(--R)*-1);overflow:hidden;border-radius:var(--R) var(--R) 0 0;touch-action:none;cursor:grab}
 #whl{position:absolute;left:0;top:0;width:100%;height:calc(var(--R)*2)}
-#val{position:absolute;left:50%;bottom:calc(var(--R)*-.475);width:calc(var(--R)*.95);height:calc(var(--R)*.95);margin-left:calc(var(--R)*-.475);border-radius:50%;border:2px solid #fff;background:var(--whl);color:#fff;padding:7px 0 0;display:flex;flex-direction:column;align-items:center;font-family:var(--serif)}
-#val small{font-size:10px;font-variant:small-caps;letter-spacing:.08em;line-height:1.2}
-#val b{font-size:20px;line-height:1.1;font-weight:600}
+#val{position:absolute;left:50%;bottom:calc(var(--R)*-.475);width:calc(var(--R)*.95);height:calc(var(--R)*.95);margin-left:calc(var(--R)*-.475);border-radius:50%;border:2px solid #fff;background:var(--whl);color:#fff;padding:0;display:block;font-family:var(--serif)}
+#val svg{display:block;width:100%;height:100%}
+#val text{fill:#fff;font-family:var(--serif)}
+#hl{font-variant:small-caps;letter-spacing:.06em}
+#hv{font-weight:600}
 :focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 #toast{position:fixed;left:50%;bottom:calc(var(--L) + var(--u)*440 + 8px);transform:translate(-50%,6px);max-width:min(90vw,420px);padding:10px 16px;border-radius:14px;background:var(--pill);color:#fff;font-size:14px;text-align:center;opacity:0;pointer-events:none;transition:.25s;z-index:30}
@@ -164,9 +166,13 @@ let g='<circle r="100" style="fill:var(--whl)"/>';
 for(let i=0;i<12;i++){const a=i*Math.PI/6;g+=`<line x2="${(100*Math.cos(a)).toFixed(1)}" y2="${(100*Math.sin(a)).toFixed(1)}" style="stroke:var(--spk)" stroke-width="1.6"/>`}
 whl.innerHTML=g;whl.style.transformOrigin="50% 50%";
 
+const hub=$("#val");
+hub.innerHTML='<svg viewBox="-50 -50 100 100" aria-hidden="true"><path id="arc" d="M -38 0 A 38 38 0 0 1 38 0" fill="none"/><text id="hl" font-size="11"><textPath id="htp" href="#arc" xlink:href="#arc" startOffset="50%" text-anchor="middle"></textPath></text><text id="hv" x="0" y="-12" text-anchor="middle" font-size="21"></text></svg>';
 function show(){
   const t=tdef(),v=P[tool];
-  $("#val").innerHTML=`<small>${t[1]}</small><b>${v.toFixed(2)}</b>`;
+  $("#htp").textContent=t[1];$("#hl").setAttribute("font-size",11);
+  const ll=$("#htp").getComputedTextLength();if(ll>78)$("#hl").setAttribute("font-size",11*78/ll);
+  $("#hv").textContent=v.toFixed(2);
   whl.style.transform=`rotate(${(v-t[2])/(t[3]-t[2])*360*TURNS}deg)`;
   wrap.setAttribute("aria-valuemin",t[2]);wrap.setAttribute("aria-valuemax",t[3]);wrap.setAttribute("aria-valuenow",v);
 }
