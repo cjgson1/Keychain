@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Keychain</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Keychain">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#3b3b3b">
+<meta name="theme-color" content="#eef0f4" media="(prefers-color-scheme: light)">
+<style>
+/* Citadel Script: upload the font file to fonts/CitadelScript.ttf (or change the name here) */
+@font-face{font-family:"Citadel Script";src:url("fonts/CitadelScript.ttf") format("truetype");font-display:swap}
+/* --u is one pixel of the 1080-wide mockup, so everything keeps the mockup's proportions */
+:root{--tp:0px;
+--u:calc(min(100vw,480px)/1080);--R:calc(var(--u)*270);--L:calc(env(safe-area-inset-bottom,0px) + 12px);
+--ink:#fff;--etx:#fff;--spk:#fff;--bg:#3b3b3b;--pill:#686979;--bez:#686979;--scr:#a8aabf;--whl:#55938b;--snd:#b2b3c2;--stx:#3b3b3b;--line:#5a5b66;--card:#4a4b55;--mute:#b9bacb;
+--script:"Citadel Script","Snell Roundhand","Apple Chancery",cursive;--serif:ui-serif,"New York",Georgia,serif;color-scheme:dark}
+@media (prefers-color-scheme:light){
+:root{--ink:#2b2c33;--etx:#55566a;--bg:#eef0f4;--pill:#6f7088;--bez:#6f7088;--scr:#d3d5e3;--snd:#3b3b3b;--stx:#fff;--line:#c9ccd9;--card:#fff;--mute:#6a6b78;color-scheme:light}}
+*{box-sizing:border-box;margin:0}
+html{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 var(--serif);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding-top:calc(env(safe-area-inset-top,0px) + var(--tp));height:100%}
+#app{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;position:relative}
+header{position:relative;flex:none;height:calc(var(--u)*300)}
+.heart{position:absolute;left:calc(var(--u)*10);top:calc(var(--u)*10);height:calc(var(--u)*322);width:auto;pointer-events:none;z-index:2}
+.title{position:absolute;left:0;right:0;top:calc(var(--u)*4);text-align:center;font:400 calc(var(--u)*64)/calc(var(--u)*72) var(--script);white-space:nowrap}
+.pill{position:relative;display:block;height:max(30px,calc(var(--u)*72));padding:0 calc(var(--u)*18);border:0;border-radius:99px;background:var(--pill);color:#fff;font:600 max(13px,calc(var(--u)*42))/max(30px,calc(var(--u)*72)) var(--serif);font-variant:small-caps;letter-spacing:.02em;white-space:nowrap;cursor:pointer}
+.pill::after{content:"";position:absolute;inset:-9px -6px}
+#setup{position:absolute;right:calc(var(--u)*32);top:calc(var(--u)*23)}
+#pv{position:absolute;left:50%;top:calc(var(--u)*177);transform:translateX(-50%)}
+#ph{position:absolute;right:calc(var(--u)*32);top:calc(var(--u)*177)}
+#stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center}
+#stage::before,#stage::after{content:"";display:block}
+#stage::before{flex:1}#stage::after{flex:1.8}
+.frame{position:relative;padding:calc(var(--u)*48) calc(var(--u)*30) calc(var(--u)*22);background:var(--bez);border-radius:calc(var(--u)*52)}
+.frame::before{content:"";position:absolute;top:calc(var(--u)*12);left:50%;width:calc(var(--u)*26);height:calc(var(--u)*26);margin-left:calc(var(--u)*-13);border-radius:50%;background:var(--bg)}
+#cv{display:block;margin:0 auto;width:100%;aspect-ratio:1;image-rendering:pixelated;touch-action:none;background:var(--scr);cursor:grab}
+#empty{position:absolute;top:calc(var(--u)*48);left:calc(var(--u)*30);right:calc(var(--u)*30);bottom:calc(var(--u)*22);display:grid;place-content:center;gap:4px;text-align:center;background:var(--scr);color:var(--etx);cursor:pointer;font:300 max(14px,calc(var(--u)*42)) system-ui,-apple-system,sans-serif}
+#empty span{font-size:12px;opacity:.85}
+.has #empty{display:none}
+#dock{position:relative;flex:none;height:calc(var(--L) + var(--u)*440)}
+.tier{z-index:2;position:absolute;left:0;right:0;bottom:calc(var(--L) + var(--y)*var(--u));transform:translateY(50%);display:grid;grid-template-columns:1fr var(--g) 1fr;align-items:center;pointer-events:none}
+.tier>*{pointer-events:auto}
+.tier>:first-child{justify-self:end}.tier>:last-child{justify-self:start}.tier>i{display:block}
+.t1{--y:318;--g:auto;column-gap:calc(var(--u)*34)}
+.t2{--y:212;--g:calc(var(--u)*460)}
+.t3{--y:114;--g:calc(var(--u)*660)}
+.pill[aria-pressed=true]{background:var(--whl)}
+.send{justify-self:center;transform:translateY(calc(var(--u)*-55));height:max(44px,calc(var(--u)*112));padding:0 calc(var(--u)*52);background:var(--snd);color:var(--stx);font-size:max(19px,calc(var(--u)*54));line-height:max(44px,calc(var(--u)*112))}
+.send:disabled{opacity:.7}
+#wheelwrap{position:absolute;left:50%;bottom:var(--L);width:calc(var(--R)*2);height:var(--R);margin-left:calc(var(--R)*-1);overflow:hidden;border-radius:var(--R) var(--R) 0 0;touch-action:none;cursor:grab}
+#whl{position:absolute;left:0;top:0;width:100%;height:calc(var(--R)*2)}
+#val{position:absolute;left:50%;bottom:calc(var(--R)*-.475);width:calc(var(--R)*.95);height:calc(var(--R)*.95);margin-left:calc(var(--R)*-.475);border-radius:50%;border:2px solid #fff;background:var(--whl);color:#fff;padding:0;display:block;font-family:var(--serif)}
+#val svg{display:block;width:100%;height:100%}
+#val text{fill:#fff;font-family:var(--serif)}
+#hl{font-variant:small-caps;letter-spacing:.06em}
+#hv{font-weight:600}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+#toast{position:fixed;left:50%;bottom:calc(var(--L) + var(--u)*440 + 8px);transform:translate(-50%,6px);max-width:min(90vw,420px);padding:10px 16px;border-radius:14px;background:var(--pill);color:#fff;font-size:14px;text-align:center;opacity:0;pointer-events:none;transition:.25s;z-index:30}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#sheet,#pvw{position:fixed;inset:0;z-index:15}
+#sheet{display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5)}
+#pvw{display:grid;place-items:center;background:rgba(0,0,0,.85)}
+#sheet[hidden],#pvw[hidden]{display:none}
+.panel{width:100%;max-width:480px;background:var(--bg);border-radius:24px 24px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));display:grid;gap:10px}
+.panel h2{font:600 22px var(--serif)}
+.panel p{font-size:14px;color:var(--mute)}
+.panel label{font:600 13px var(--serif);font-variant:small-caps;letter-spacing:.06em;color:var(--mute)}
+.panel input{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:16px system-ui,sans-serif;-webkit-user-select:text;user-select:text}
+.panel input[type=range]{padding:0;border:0;background:none;accent-color:var(--whl)}
+.btn{height:48px;padding:0 22px;border:0;border-radius:99px;background:var(--pill);color:#fff;font:600 16px var(--serif);font-variant:small-caps;letter-spacing:.04em;cursor:pointer}
+.pbox{display:grid;justify-items:center;gap:14px;padding:20px;color:#fff;width:min(90vw,360px);text-align:center}
+#pvc{display:block;background:#000;box-shadow:0 0 0 8px var(--bez)}
+.pbox p{font-size:13px;color:#cfd0dc}
+.pbox input{width:100%;accent-color:var(--whl)}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <picture><source media="(prefers-color-scheme: light)" srcset="heart-light.png"><img class="heart" src="heart-dark.png" alt="C plus A"></picture>
+    <div class="title">For You and Me</div>
+    <button class="pill" id="setup">Setup</button>
+    <button class="pill" id="pv">Preview</button>
+    <label class="pill" id="ph" for="file">Photo</label>
+  </header>
+  <main id="stage">
+    <div class="frame">
+      <canvas id="cv" width="240" height="240" aria-label="Preview of the photo on the e-ink screen. Drag to move, pinch to zoom."></canvas>
+      <label id="empty" for="file">Image Preview<span>tap to choose a photo</span></label>
+    </div>
+  </main>
+  <section id="dock" aria-label="Adjustments">
+    <div class="tier t1">
+      <button class="pill tp" data-k="contrast">Contrast</button>
+      <button class="pill send" id="send" disabled>Send!</button>
+      <button class="pill tp" data-k="sat">Color</button>
+    </div>
+    <div class="tier t2">
+      <button class="pill tp" data-k="bright">Brightness</button><i></i>
+      <button class="pill tp" data-k="dither">Dither</button>
+    </div>
+    <div class="tier t3">
+      <button class="pill" id="reset">Reset</button><i></i>
+      <button class="pill" id="fit">Fit</button>
+    </div>
+    <div id="wheelwrap" role="slider" tabindex="0" aria-label="Adjustment wheel">
+      <svg id="whl" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
+      <button id="val" aria-label="Reset this adjustment"></button>
+    </div>
+  </section>
+</div>
+<input id="file" class="vh" type="file" accept="image/*">
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="pvw" hidden>
+  <div class="pbox">
+    <canvas id="pvc" width="240" height="240" aria-label="Photo at the real size of the keychain screen"></canvas>
+    <p>This is about the real size of the 1.54" screen. Slide to match it to your actual screen.</p>
+    <input id="pvs" type="range" min="110" max="260" step="1" aria-label="Preview size">
+    <button class="btn" id="pvx">Close</button>
+  </div>
+</div>
+<div id="sheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="st">
+    <h2 id="st">Setup</h2>
+    <p id="ios" hidden>Tip: tap Share, then Add to Home Screen, to open this like an app. The home-screen app keeps its own settings, so you will enter the slot name again there.</p>
+    <label for="nm">Their name (optional)</label>
+    <input id="nm" type="text" maxlength="20" autocomplete="off">
+    <label for="slot">Their keychain code</label>
+    <input id="slot" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <p>This is the other persons keychain code. If you don't know what to put in just ask your super handsome and funny boyfriend ;)</p>
+    <label for="tps">Top spacing</label>
+    <input id="tps" type="range" min="0" max="90" step="1">
+    <label for="bts">Bottom spacing</label>
+    <input id="bts" type="range" min="0" max="90" step="1">
+    <button class="btn" id="save">Save</button>
+  </div>
+</div>
+<script>
+const DB="https://keychain-b8a5e-default-rtdb.firebaseio.com",N=240,TURNS=1.5;
+// 0 black, 1 white, 2 red, 3 yellow, 4 blue, 5 green (colors from the Python preview tool)
+const PAL=[[0,0,0],[255,255,255],[160,32,32],[240,224,80],[80,128,184],[96,128,80]];
+const TOOLS=[["bright","Brightness",0,3],["contrast","Contrast",0,3],["sat","Color",0,3],["dither","Dither",0,1]];
+const $=s=>document.querySelector(s);
+const ls={get:k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const okSlot=v=>/^[A-Za-z0-9]{10,}$/.test(v);
+const DEF={bright:0.65,contrast:1.40,sat:0.75,dither:0.85};
+const P={bright:0.65,contrast:1.40,sat:0.75,dither:0.85};
+let src,mips=[],w,h,s,sx,sy,fill="#000",idx=null,tool="bright",busy=false,raf=0,tt,wv=0;
+const cv=$("#cv"),cx=cv.getContext("2d");
+const work=document.createElement("canvas");work.width=work.height=N;
+const wc=work.getContext("2d",{willReadFrequently:true});
+const tdef=()=>TOOLS.find(t=>t[0]===tool);
+
+// Wheel graphic: 12 spokes that turn with the value
+const whl=$("#whl"),wrap=$("#wheelwrap");
+let g='<circle r="100" style="fill:var(--whl)"/>';
+for(let i=0;i<12;i++){const a=i*Math.PI/6;g+=`<line x2="${(100*Math.cos(a)).toFixed(1)}" y2="${(100*Math.sin(a)).toFixed(1)}" style="stroke:var(--spk)" stroke-width="1.6"/>`}
+whl.innerHTML=g;whl.style.transformOrigin="50% 50%";
+
+const hub=$("#val");
+hub.innerHTML='<svg viewBox="-50 -50 100 100" aria-hidden="true"><path id="arc" d="M -38 0 A 38 38 0 0 1 38 0" fill="none"/><text id="hl" font-size="11"><textPath id="htp" href="#arc" xlink:href="#arc" startOffset="50%" text-anchor="middle"></textPath></text><text id="hv" x="0" y="-12" text-anchor="middle" font-size="21"></text></svg>';
+function show(){
+  const t=tdef(),v=P[tool];
+  $("#htp").textContent=t[1];$("#hl").setAttribute("font-size",11);
+  const ll=$("#htp").getComputedTextLength();if(ll>78)$("#hl").setAttribute("font-size",11*78/ll);
+  $("#hv").textContent=v.toFixed(2);
+  whl.style.transform=`rotate(${(v-t[2])/(t[3]-t[2])*360*TURNS}deg)`;
+  wrap.setAttribute("aria-valuemin",t[2]);wrap.setAttribute("aria-valuemax",t[3]);wrap.setAttribute("aria-valuenow",v);
+}
+function pick(k){tool=k;document.querySelectorAll(".tp[data-k]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===k));wv=P[k];show()}
+function setVal(v){const t=tdef();P[tool]=Math.round(clamp(v,t[2],t[3])*100)/100;show();sched()}
+document.querySelectorAll(".tp[data-k]").forEach(b=>b.onclick=()=>pick(b.dataset.k));
+$("#val").onpointerdown=e=>e.stopPropagation();
+$("#val").onclick=()=>{P[tool]=DEF[tool];wv=P[tool];show();sched()};
+let la=null;
+const ang=e=>{const r=wrap.getBoundingClientRect();return Math.atan2(e.clientY-r.bottom,e.clientX-(r.left+r.width/2))};
+wrap.onpointerdown=e=>{wrap.setPointerCapture(e.pointerId);la=ang(e);wv=P[tool]};
+wrap.onpointermove=e=>{
+  if(la===null)return;
+  const a=ang(e);let d=a-la;if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;la=a;
+  const t=tdef();wv=clamp(wv+d/(2*Math.PI*TURNS)*(t[3]-t[2]),t[2],t[3]);setVal(wv);
+};
+wrap.onpointerup=wrap.onpointercancel=()=>{la=null};
+wrap.onkeydown=e=>{const d={ArrowRight:.01,ArrowUp:.01,ArrowLeft:-.01,ArrowDown:-.01}[e.key];if(d){e.preventDefault();wv=P[tool]+d;setVal(wv)}};
+pick("bright");
+
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),3400)}
+const ctr=()=>{sx=(w-s)/2;sy=(h-s)/2};
+const pan=()=>{sx=w>=s?clamp(sx,0,w-s):(w-s)/2;sy=h>=s?clamp(sy,0,h-s):(h-s)/2};
+const zlim=v=>clamp(v,Math.min(w,h)/12,Math.max(w,h));
+
+$("#file").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const im=new Image();
+  im.onload=()=>{
+    const k=Math.min(1,2000/Math.max(im.width,im.height));
+    w=Math.round(im.width*k);h=Math.round(im.height*k);
+    src=document.createElement("canvas");src.width=w;src.height=h;
+    src.getContext("2d").drawImage(im,0,0,w,h);URL.revokeObjectURL(im.src);
+    mips=[src];
+    while(Math.min(mips[mips.length-1].width,mips[mips.length-1].height)>=N*2){const p=mips[mips.length-1],c=document.createElement("canvas");c.width=Math.max(1,p.width>>1);c.height=Math.max(1,p.height>>1);const q=c.getContext("2d");q.imageSmoothingQuality="high";q.drawImage(p,0,0,c.width,c.height);mips.push(c)}
+    s=Math.min(w,h);ctr();$("#stage").classList.add("has");toast("Drag to move · pinch to zoom");sched();
+  };
+  im.onerror=()=>toast("Couldn’t open that photo. Try another one.");
+  im.src=URL.createObjectURL(f);e.target.value="";
+};
+$("#fit").onclick=()=>{if(!src)return;s=s<Math.max(w,h)-1?Math.max(w,h):Math.min(w,h);ctr();sched()};
+$("#reset").onclick=()=>{Object.keys(P).forEach(k=>P[k]=DEF[k]);wv=P[tool];show();if(src){s=Math.min(w,h);ctr()}sched()};
+
+// Gestures: one finger pans, two fingers pinch-zoom around the midpoint, wheel zooms on desktop
+const pts=new Map();let g0=null;
+const pa=()=>[...pts.values()];
+const cen=(a,r)=>({x:a.reduce((t,p)=>t+p.x,0)/a.length-r.left,y:a.reduce((t,p)=>t+p.y,0)/a.length-r.top});
+const dst=a=>Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+function begin(){const a=pa(),r=cv.getBoundingClientRect(),c=cen(a,r);g0={s,d:a.length>1?dst(a):0,ax:sx+c.x/r.width*s,ay:sy+c.y/r.height*s}}
+cv.onpointerdown=e=>{if(!src)return;cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});begin()};
+cv.onpointermove=e=>{
+  if(!pts.has(e.pointerId))return;
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const a=pa(),r=cv.getBoundingClientRect(),c=cen(a,r);
+  s=a.length>1&&g0.d?zlim(g0.s*g0.d/dst(a)):g0.s;
+  sx=g0.ax-c.x/r.width*s;sy=g0.ay-c.y/r.height*s;pan();sched();
+};
+cv.onpointerup=cv.onpointercancel=e=>{pts.delete(e.pointerId);if(pts.size)begin()};
+cv.addEventListener("wheel",e=>{
+  if(!src)return;e.preventDefault();
+  const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height,ax=sx+x*s,ay=sy+y*s;
+  s=zlim(s*Math.exp(e.deltaY*.002));sx=ax-x*s;sy=ay-y*s;pan();sched();
+},{passive:false});
+
+// Show the canvas at a whole-number multiple of device pixels so dither pixels stay even
+function fitCv(){
+  const fr=cv.parentElement,st=$("#stage");fr.style.width="";cv.style.width="";
+  const cs=getComputedStyle(fr),pX=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight),pY=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
+  const d=window.devicePixelRatio||1,W=Math.min(innerWidth,480);
+  let k=Math.max(1,Math.floor(W*.66*d/N)),z=N*k/d;
+  while(k>1&&z+pY>st.clientHeight-8){k--;z=N*k/d}
+  cv.style.width=z+"px";fr.style.width=(z+pX)+"px";
+}
+let autoL=12;
+function probe(){
+  const pr=document.createElement("div");pr.style.cssText="position:fixed;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)";
+  document.body.append(pr);const cs=getComputedStyle(pr),r={t:parseFloat(cs.paddingTop)||0,b:parseFloat(cs.paddingBottom)||0};pr.remove();return r;
+}
+function fixH(){
+  const sa=navigator.standalone||matchMedia("(display-mode: standalone)").matches,sf=probe();
+  // The wheel runs almost to the bottom edge, like the mockup; raise Bottom spacing in Setup for more room
+  autoL=4;
+  const tp=ls.get("tp"),bp=ls.get("bp"),R=document.documentElement.style;
+  R.setProperty("--tp",(tp!==""?+tp:24)+"px");
+  R.setProperty("--L",(bp!==""?+bp:autoL)+"px");
+  fitCv();
+}
+addEventListener("resize",fixH);addEventListener("orientationchange",()=>setTimeout(fixH,250));fixH();
+// Tap the title 5 times quickly to see screen measurements (for troubleshooting)
+let tc=0,tl=0;$(".title").onclick=()=>{
+  const n=Date.now();tc=n-tl<600?tc+1:1;tl=n;if(tc<5)return;tc=0;
+  const pr=document.createElement("div");pr.style.cssText="position:fixed;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)";document.body.append(pr);
+  const cs=getComputedStyle(pr);toast(`window ${innerWidth}x${innerHeight}, screen ${screen.width}x${screen.height}, safe ${cs.paddingTop}/${cs.paddingBottom}, app ${$("#app").offsetHeight}, bottom space ${autoL}`);pr.remove();
+};
+const sched=()=>{if(!raf)raf=requestAnimationFrame(render)};
+function render(){
+  raf=0;
+  if(!src){cx.clearRect(0,0,N,N);return}
+  wc.fillStyle=fill;wc.fillRect(0,0,N,N);wc.imageSmoothingQuality="high";
+  const x0=Math.max(sx,0),y0=Math.max(sy,0),x1=Math.min(sx+s,w),y1=Math.min(sy+s,h);
+  let l=0;while(l+1<mips.length&&s/Math.pow(2,l+1)>=N)l++;
+  const ms=mips[l],fx=ms.width/w,fy=ms.height/h;
+  if(x1>x0&&y1>y0)wc.drawImage(ms,x0*fx,y0*fy,(x1-x0)*fx,(y1-y0)*fy,(x0-sx)/s*N,(y0-sy)/s*N,(x1-x0)/s*N,(y1-y0)/s*N);
+  // Same order as the Python tool: brightness, contrast, color, then dither
+  const a=new Uint8ClampedArray(wc.getImageData(0,0,N,N).data),L=N*N,n=L*4;
+  for(let i=0;i<n;i+=4){a[i]*=P.bright;a[i+1]*=P.bright;a[i+2]*=P.bright}
+  let m=0;for(let i=0;i<n;i+=4)m+=(299*a[i]+587*a[i+1]+114*a[i+2])/1000;
+  m=Math.floor(m/L+.5);
+  for(let i=0;i<n;i+=4){a[i]=m+(a[i]-m)*P.contrast;a[i+1]=m+(a[i+1]-m)*P.contrast;a[i+2]=m+(a[i+2]-m)*P.contrast}
+  for(let i=0;i<n;i+=4){const y=(299*a[i]+587*a[i+1]+114*a[i+2])/1000;a[i]=y+(a[i]-y)*P.sat;a[i+1]=y+(a[i+1]-y)*P.sat;a[i+2]=y+(a[i+2]-y)*P.sat}
+  const f=new Float32Array(L*3);
+  for(let i=0,j=0;i<n;i+=4){f[j++]=a[i];f[j++]=a[i+1];f[j++]=a[i+2]}
+  const o=cx.createImageData(N,N),od=o.data,wt=P.dither;idx=new Uint8Array(L);
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const i=y*N+x,q=i*3,r=f[q],g=f[q+1],b=f[q+2];let k=0,best=1e18;
+    for(let c=0;c<6;c++){const p=PAL[c],dr=r-p[0],dg=g-p[1],db=b-p[2],dd=dr*dr+dg*dg+db*db;if(dd<best){best=dd;k=c}}
+    idx[i]=k;const p=PAL[k];od[i*4]=p[0];od[i*4+1]=p[1];od[i*4+2]=p[2];od[i*4+3]=255;
+    const er=(r-p[0])*wt,eg=(g-p[1])*wt,eb=(b-p[2])*wt;
+    if(x+1<N){f[q+3]+=er*7/16;f[q+4]+=eg*7/16;f[q+5]+=eb*7/16}
+    if(y+1<N){
+      const d=q+N*3;
+      if(x>0){f[d-3]+=er*3/16;f[d-2]+=eg*3/16;f[d-1]+=eb*3/16}
+      f[d]+=er*5/16;f[d+1]+=eg*5/16;f[d+2]+=eb*5/16;
+      if(x+1<N){f[d+3]+=er/16;f[d+4]+=eg/16;f[d+5]+=eb/16}
+    }
+  }
+  cx.putImageData(o,0,0);
+  $("#fit").textContent=w!==h&&s>=Math.max(w,h)-1?"Fill":"Fit";
+  $("#send").disabled=busy;
+}
+
+// True-size preview: about 1.09 in (28 mm) square, tuned once to your phone with the slider
+const pvc=$("#pvc"),pvw=$("#pvw");
+function pvSize(){const z=+ls.get("pv")||170;pvc.style.width=pvc.style.height=z+"px";$("#pvs").value=z}
+$("#pv").onclick=()=>{if(!idx){toast("Choose a photo first.");return}pvc.getContext("2d").drawImage(cv,0,0);pvSize();pvw.hidden=false};
+$("#pvs").oninput=e=>{ls.set("pv",e.target.value);pvSize()};
+$("#pvx").onclick=()=>{pvw.hidden=true};
+pvw.onclick=e=>{if(e.target===pvw)pvw.hidden=true};
+
+// Two pixels per byte, first pixel in the high 4 bits: 28,800 bytes
+function pack(){const o=new Uint8Array(N*N/2);for(let i=0;i<o.length;i++)o[i]=(idx[2*i]<<4)|idx[2*i+1];return o}
+function b64(u){let t="";for(let i=0;i<u.length;i+=8192)t+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(t)}
+const name=()=>ls.get("nm")||"them";
+const lab=()=>{if(!busy)$("#send").textContent="Send!"};
+
+$("#send").onclick=async()=>{
+  const slot=ls.get("slot");
+  if(!okSlot(slot)){openSheet();toast("Add their keychain code first.");return}
+  if(!idx){toast("Choose a photo first.");return}
+  busy=true;$("#send").disabled=true;$("#send").textContent="Sending…";
+  try{
+    const r=await fetch(`${DB}/mailbox/${slot}.json`,{method:"PUT",body:JSON.stringify({id:String(Date.now()),img:b64(pack())})});
+    if(r.ok){$("#send").textContent="Sent ✓";toast(`Sent to ${name()}'s keychain.`)}
+    else{toast(`Send failed (error ${r.status}). Check the slot name.`)}
+  }catch(e){toast("No connection. Check your internet and try again.")}
+  busy=false;$("#send").disabled=!idx;setTimeout(lab,2200);
+};
+
+// Setup sheet
+const sh=$("#sheet");
+function openSheet(){
+  $("#nm").value=ls.get("nm");$("#slot").value=ls.get("slot");$("#tps").value=ls.get("tp")!==""?ls.get("tp"):24;$("#bts").value=ls.get("bp")!==""?ls.get("bp"):autoL;
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!(navigator.standalone||matchMedia("(display-mode: standalone)").matches);
+  $("#ios").hidden=!ios;sh.hidden=false;
+}
+$("#setup").onclick=openSheet;
+$("#tps").oninput=e=>{ls.set("tp",e.target.value);fixH()};
+$("#bts").oninput=e=>{ls.set("bp",e.target.value);fixH()};
+$("#save").onclick=()=>{
+  const v=$("#slot").value.trim();
+  if(!okSlot(v)){toast("Slot name: letters and digits only, at least 10.");return}
+  ls.set("slot",v);ls.set("nm",$("#nm").value.trim());sh.hidden=true;lab();
+};
+sh.onclick=e=>{if(e.target===sh&&okSlot(ls.get("slot")))sh.hidden=true};
+lab();render();if(!okSlot(ls.get("slot")))openSheet();
+
+// Offline support and updates
+if("serviceWorker" in navigator&&location.protocol.startsWith("http")){
+  const had=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!busy)location.reload()});
+}
+</script>
+</body>
+</html>
